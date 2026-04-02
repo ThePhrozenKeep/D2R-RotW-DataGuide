@@ -1,0 +1,43 @@
+# Deploys the repository to cPanel over SFTP on every push to main.
+#
+# cPanel “FTP Accounts” user (example): gha@d2mods.info → jailed to
+#   /home/brjoro/blizzardguide.d2mods.info
+# Secrets:
+#   SFTP_HOST       — usually your primary domain, e.g. d2mods.info (no sftp:// prefix)
+#   SFTP_USERNAME — full FTP username, e.g. gha@d2mods.info
+#   SFTP_PASSWORD — password you set for that FTP account in cPanel
+#
+# Remote path: for a jailed FTP user, "/" is the account root (that folder above). If uploads
+# land in the wrong place, try the full path instead, or /public_html if your docroot is there.
+
+name: Deploy SFTP
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      # Jailed login: "/" = /home/brjoro/blizzardguide.d2mods.info on the server
+      SFTP_REMOTE_PATH: /
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Upload via SFTP
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.6
+        with:
+          server: ${{ secrets.SFTP_HOST }}
+          username: ${{ secrets.SFTP_USERNAME }}
+          password: ${{ secrets.SFTP_PASSWORD }}
+          port: 22
+          local_path: ./
+          remote_path: ${{ env.SFTP_REMOTE_PATH }}
+          sftp_only: true
+          rsyncArgs: >-
+            --exclude=.git
+            --exclude=.github
