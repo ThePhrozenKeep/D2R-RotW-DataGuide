@@ -8,7 +8,6 @@
 #   SFTP_USERNAME — full FTP username, e.g. gha@d2mods.info
 #   SFTP_PASSWORD — password for that FTP account
 #
-# If FTPS fails with TLS/certificate errors, set protocol to ftp below (insecure; host may allow it).
 
 name: Deploy FTP
 
@@ -35,7 +34,7 @@ jobs:
           protocol: ftps
           local-dir: ./
           server-dir: ./
-          security: strict
+          security: loose
           exclude: |
             **/.git*
             **/.git*/**
