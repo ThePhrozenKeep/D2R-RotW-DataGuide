@@ -1,0 +1,28 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# FTP-Deploy-Action (server-side sync file — do not commit)
+.ftp-deploy-sync-state.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+.venv/
+venv/
+.env
+.env.*
+
+# Editor / IDE (uncomment if you don’t want these in the repo)
+# .idea/
+# *.swp
+# *.swo
