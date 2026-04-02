@@ -1,16 +1,16 @@
-# Deploys the repository to cPanel over SFTP on every push to main.
+# Deploys the repository to cPanel over FTP (explicit FTPS on port 21) on push to main.
 #
-# cPanel “FTP Accounts” user (example): gha@d2mods.info → jailed to
-#   /home/brjoro/blizzardguide.d2mods.info
-# Secrets:
-#   SFTP_HOST       — usually your primary domain, e.g. d2mods.info (no sftp:// prefix)
+# cPanel shows: FTP server ftp.d2mods.info, user gha@d2mods.info, port 21 (FTP / explicit FTPS).
+# This is not SFTP (SSH); SFTP uses port 22 and was refusing from GitHub Actions.
+#
+# Secrets (Settings → Secrets and variables → Actions):
+#   SFTP_HOST       — FTP hostname from cPanel, e.g. ftp.d2mods.info
 #   SFTP_USERNAME — full FTP username, e.g. gha@d2mods.info
-#   SFTP_PASSWORD — password you set for that FTP account in cPanel
+#   SFTP_PASSWORD — password for that FTP account
 #
-# Remote path: for a jailed FTP user, "/" is the account root (that folder above). If uploads
-# land in the wrong place, try the full path instead, or /public_html if your docroot is there.
+# If FTPS fails with TLS/certificate errors, set protocol to ftp below (insecure; host may allow it).
 
-name: Deploy SFTP
+name: Deploy FTP
 
 on:
   push:
@@ -20,24 +20,23 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    env:
-      # Jailed login: "/" = /home/brjoro/blizzardguide.d2mods.info on the server
-      SFTP_REMOTE_PATH: /
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Upload via SFTP
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.6
+      - name: Sync via FTPS
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
           server: ${{ secrets.SFTP_HOST }}
           username: ${{ secrets.SFTP_USERNAME }}
           password: ${{ secrets.SFTP_PASSWORD }}
-          port: 22
-          local_path: ./
-          remote_path: ${{ env.SFTP_REMOTE_PATH }}
-          sftp_only: true
-          rsyncArgs: >-
-            --exclude=.git
-            --exclude=.github
+          port: 21
+          protocol: ftps
+          local-dir: ./
+          server-dir: ./
+          security: strict
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/.github/**
